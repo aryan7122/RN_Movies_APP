@@ -62,15 +62,18 @@ const transformMovieData = (movie: any): Movie | null => {
     // Skip invalid movies
     if (!movie || !movie.imdbID) return null;
     
+    // Handle cases where Poster is 'N/A'
+    const posterUrl = movie.Poster && movie.Poster !== 'N/A' ? movie.Poster : null;
+    
     return {
         id: parseInt(movie.imdbID.replace('tt', '')),
         title: movie.Title || 'Unknown Title',
         overview: movie.Plot || '',
-        poster_path: movie.Poster === 'N/A' ? null : movie.Poster,
-        backdrop_path: movie.Poster === 'N/A' ? null : movie.Poster,
+        poster_path: posterUrl,
+        backdrop_path: posterUrl,
         vote_average: parseFloat(movie.imdbRating) || 0,
         release_date: movie.Year || 'N/A',
-        genre_ids: []
+        genre_ids: movie.Genre ? movie.Genre.split(', ').map((_: string, i: number) => i) : []
     };
 };
 
@@ -162,39 +165,57 @@ export const api = {
 
     // Get full movie details including cast and crew
     getMovieDetails: async (id: string): Promise<MovieDetails | null> => {
-        const response = await fetchWithTimeout(endpoints.byId(id));
-        const data = await handleResponse(response);
-        
-        if (data.Response !== 'True') return null;
+        try {
+            const response = await fetchWithTimeout(endpoints.byId(id));
+            const data = await handleResponse(response);
+            
+            if (data.Response !== 'True') {
+                console.error('OMDB API returned false response:', data);
+                return null;
+            }
 
-        // Transform into MovieDetails format
-        return {
-            id: parseInt(data.imdbID.replace('tt', '')),
-            title: data.Title,
-            original_title: data.Title,
-            original_language: 'en',
-            overview: data.Plot || null,
-            backdrop_path: data.Poster || null,
-            poster_path: data.Poster || null,
-            vote_average: parseFloat(data.imdbRating) || 0,
-            vote_count: parseInt(data.imdbVotes?.replace(/,/g, '')) || 0,
-            release_date: data.Year,
-            runtime: parseInt(data.Runtime) || null,
-            genres: data.Genre?.split(', ').map((name: string, id: number) => ({ id, name })) || [],
-            adult: data.Rated === 'R' || data.Rated === 'NC-17',
-            budget: 0,
-            homepage: null,
-            imdb_id: data.imdbID || null,
-            popularity: 0,
-            production_companies: [],
-            production_countries: [],
-            revenue: 0,
-            spoken_languages: [],
-            status: 'Released',
-            tagline: null,
-            video: false,
-            belongs_to_collection: null
-        };
+            // Parse runtime (convert "123 min" to 123)
+            const runtimeMatch = data.Runtime ? data.Runtime.match(/\d+/) : null;
+            const runtime = runtimeMatch ? parseInt(runtimeMatch[0]) : null;
+
+            // Format release date (convert year to YYYY-MM-DD format)
+            const releaseDate = `${data.Year}-01-01`;
+
+            // Get poster URL, handling 'N/A' case
+            const posterUrl = data.Poster && data.Poster !== 'N/A' ? data.Poster : null;
+
+            // Transform into MovieDetails format
+            return {
+                id: parseInt(data.imdbID.replace('tt', '')),
+                title: data.Title,
+                original_title: data.Title,
+                original_language: 'en',
+                overview: data.Plot || null,
+                backdrop_path: posterUrl,
+                poster_path: posterUrl,
+                vote_average: parseFloat(data.imdbRating) || 0,
+                vote_count: parseInt(data.imdbVotes?.replace(/,/g, '')) || 0,
+                release_date: releaseDate,
+                runtime: runtime,
+                genres: data.Genre?.split(', ').map((name: string, id: number) => ({ id, name })) || [],
+                adult: data.Rated === 'R' || data.Rated === 'NC-17',
+                budget: 0,
+                homepage: null,
+                imdb_id: data.imdbID || null,
+                popularity: 0,
+                production_companies: [],
+                production_countries: [],
+                revenue: 0,
+                spoken_languages: [],
+                status: 'Released',
+                tagline: null,
+                video: false,
+                belongs_to_collection: null
+            };
+        } catch (error) {
+            console.error('Error in getMovieDetails:', error);
+            return null;
+        }
     },
 
     // Search movies
