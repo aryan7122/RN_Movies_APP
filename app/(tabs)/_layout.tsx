@@ -2,7 +2,7 @@
 import { icons } from '@/constants/icons'
 import { Tabs } from 'expo-router'
 import React from 'react'
-import { Image, Pressable, Text, View } from 'react-native'
+import { Image, Platform, Pressable, Text, View } from 'react-native'
 
 // Theme configuration for tab bar
 const THEME = {
@@ -59,10 +59,18 @@ const TabButton = ({ label, icon, isFocused, onPress }: TabButtonProps) => {
         <Pressable
             onPress={onPress}
             className={`flex-1 h-14 justify-center items-center relative rounded-2xl mx-1`}
+            style={{
+                transform: [{ scale: isFocused ? 1.05 : 1 }],
+            }}
         >
             {isFocused && (
                 <View 
-                    className="absolute w-full h-full bg-purple-500/20 rounded-2xl"
+                    className="absolute w-full h-full bg-purple-500/15 rounded-2xl"
+                    style={{
+                        borderWidth: 1,
+                        borderColor: '#8B5CF6',
+                        borderRadius: 16,
+                    }}
                 />
             )}
             <View
@@ -72,13 +80,17 @@ const TabButton = ({ label, icon, isFocused, onPress }: TabButtonProps) => {
                     source={icon}
                     className={`w-6 h-6`}
                     style={{
-                        tintColor: isFocused ? '#8B5CF6' : '#6B7280'
+                        tintColor: isFocused ? '#8B5CF6' : '#6B7280',
+                        opacity: isFocused ? 1 : 0.7,
                     }}
                 />
                 {isFocused && (
                     <Text
-                        className="text-purple-500 text-sm font-semibold ml-2"
+                        className="text-purple-500 text-sm font-bold ml-2"
                         numberOfLines={1}
+                        style={{
+                            opacity: 0.9,
+                        }}
                     >
                         {label}
                     </Text>
@@ -94,10 +106,22 @@ const TabButton = ({ label, icon, isFocused, onPress }: TabButtonProps) => {
 // Agar navigation prop na mile to useNavigation hook ka use karo
 const CustomTabBar = ({ state, descriptors, navigation }: CustomTabBarProps) => {
     return (
-        <View className="absolute bottom-6 left-4 right-4">
-            {/* Modern tab bar container with blur effect */}
+        <View className="absolute bottom-6 left-4 right-4" style={{
+                ...Platform.select({
+                    ios: {
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 8,
+                    },
+                    android: {
+                        elevation: 8,
+                    },
+                }),
+            }}>
+            {/* Modern tab bar container with glass effect */}
             <View
-                className="flex-row bg-[#1F1D36] rounded-2xl overflow-hidden p-1 items-center border border-purple-500/10 shadow-xl"
+                className="flex-row bg-[#1F1D36]/95 backdrop-blur-lg rounded-2xl overflow-hidden p-1 items-center border border-purple-500/20 shadow-xl"
                 style={{
                     shadowColor: '#8B5CF6',
                     shadowOffset: { width: 0, height: 4 },

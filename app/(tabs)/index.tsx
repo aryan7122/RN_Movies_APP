@@ -10,10 +10,12 @@ import {
     Pressable,
     RefreshControl,
     ScrollView,
+    StatusBar,
     Text,
     TextInput,
     View
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 // Categories for tabs
 const CATEGORIES = [
@@ -201,9 +203,11 @@ function Home() {
     }, []);
 
     return (
-        <View className="flex-1 bg-[#0F0D23]">
+        <SafeAreaView className="flex-1 bg-[#0F0D23]">
+            <StatusBar barStyle="light-content" backgroundColor="#0F0D23" />
+            
             {/* Sticky Search Bar */}
-            <View className="px-5 py-4 bg-[#0F0D23] shadow-lg" style={{
+            <View className="px-5 py-4 bg-[#0F0D23] shadow-lg mt-2" style={{
                 ...Platform.select({
                     ios: {
                         shadowColor: '#000',
@@ -282,7 +286,7 @@ function Home() {
                     </>
                 )}
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 }
 
