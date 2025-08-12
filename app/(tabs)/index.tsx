@@ -1,12 +1,12 @@
 import { Movie } from '@/interfaces/interfaces'
 import { api } from '@/services/movieApi'
-import { LinearGradient } from 'expo-linear-gradient'
 import { Link } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
     ActivityIndicator,
     Alert,
     Image,
+    Platform,
     Pressable,
     RefreshControl,
     ScrollView,
@@ -25,44 +25,71 @@ const CATEGORIES = [
 
 // MovieCard component for rendering individual movies
 const MovieCard = ({ movie }: { movie: Movie }) => {
-    if (!movie?.poster_path) return null;
+    if (!movie) return null;
     
     return (
         <Link href={`/Movie/${movie.id}`} asChild>
-            <Pressable className="ml-5 mr-4 w-[160px]">
-                <View className="relative rounded-3xl overflow-hidden">
-                    <Image
-                        source={{ uri: movie.poster_path }}
-                        className="w-full h-[240px]"
-                        resizeMode="cover"
-                    />
-                    <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.8)']}
-                        className="absolute bottom-0 left-0 right-0 h-20 justify-end p-4"
-                    >
-                        <View className="flex-row items-center">
-                            <Image 
-                                source={require('@/assets/icons/star.png')}
-                                className="w-4 h-4 mr-1"
-                            />
-                            <Text className="text-white text-sm font-medium">
-                                {movie.vote_average.toFixed(1)}
-                            </Text>
+            <Pressable 
+                className="ml-5 mr-4 w-[160px] mb-4"
+                style={{
+                    ...Platform.select({
+                        ios: {
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 8,
+                        },
+                        android: {
+                            elevation: 8,
+                        },
+                    }),
+                }}
+            >
+                <View className="relative rounded-3xl overflow-hidden bg-[#1F1D36]">
+                    <View>
+                        <Image
+                            source={movie.poster_path ? { uri: movie.poster_path } : require('@/assets/images/bg.png')}
+                            className="w-full h-[240px]"
+                            resizeMode="cover"
+                            defaultSource={require('@/assets/images/bg.png')}
+                        />
+                        <View style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 80,
+                            justifyContent: 'flex-end',
+                            padding: 16,
+                            backgroundColor: 'rgba(0,0,0,0.6)',
+                        }}>
+                            <View className="flex-row items-center">
+                                <Image 
+                                    source={require('@/assets/icons/star.png')}
+                                    className="w-4 h-4 mr-1"
+                                    style={{ tintColor: '#FFD700' }}
+                                />
+                                <Text className="text-white text-sm font-medium">
+                                    {movie.vote_average.toFixed(1)}
+                                </Text>
+                            </View>
                         </View>
-                    </LinearGradient>
+                    </View>
+                    <View className="mt-2 mb-1 p-2 rounded-lg">
+                        <Text 
+                            className="text-white text-base font-semibold"
+                            numberOfLines={1}
+                        >
+                            {movie.title}
+                        </Text>
+                        <Text 
+                            className="text-gray-400 text-sm"
+                            numberOfLines={1}
+                        >
+                            {movie.release_date.split('-')[0]}
+                        </Text>
+                    </View>
                 </View>
-                <Text 
-                    className="text-white text-base font-semibold mt-2 mb-1"
-                    numberOfLines={1}
-                >
-                    {movie.title}
-                </Text>
-                <Text 
-                    className="text-gray-400 text-sm"
-                    numberOfLines={1}
-                >
-                    {movie.release_date.split('-')[0]}
-                </Text>
             </Pressable>
         </Link>
     )
@@ -109,6 +136,7 @@ const MovieList = ({
             <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 20 }}
             >
                 {movies.filter(movie => movie && movie.id).map(movie => (
                     <MovieCard key={String(movie.id)} movie={movie} />
@@ -173,22 +201,30 @@ function Home() {
     }, []);
 
     return (
-        <View className="flex-1 bg-[#0F0D23] pt-12">
-            {/* Main ScrollView */}
-            <ScrollView 
-                className="flex-1"
-                refreshControl={
-                    <RefreshControl 
-                        refreshing={refreshing} 
-                        onRefresh={onRefresh}
-                        tintColor="#8B5CF6" 
+        <View className="flex-1 bg-[#0F0D23]">
+            {/* Sticky Search Bar */}
+            <View className="px-5 py-4 bg-[#0F0D23] shadow-lg" style={{
+                ...Platform.select({
+                    ios: {
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        zIndex: 1,
+                    },
+                    android: {
+                        elevation: 5,
+                    },
+                }),
+            }}>
+                <View className="flex-row items-center bg-[#1F1D36] rounded-xl px-4">
+                    <Image 
+                        source={require('@/assets/icons/search.png')}
+                        className="w-5 h-5 mr-3"
+                        style={{ tintColor: '#666' }}
                     />
-                }
-            >
-                {/* Search Bar */}
-                <View className="px-5 pb-4">
                     <TextInput
-                        className="bg-[#1F1D36] text-white px-4 py-3 rounded-xl"
+                        className="flex-1 py-3 text-white text-base"
                         placeholder="Search movies..."
                         placeholderTextColor="#666"
                         value={searchQuery}
@@ -198,6 +234,20 @@ function Home() {
                         }}
                     />
                 </View>
+            </View>
+            
+            {/* Main ScrollView */}
+            <ScrollView 
+                className="flex-1"
+                contentContainerStyle={{ paddingBottom: 100 }}
+                refreshControl={
+                    <RefreshControl 
+                        refreshing={refreshing} 
+                        onRefresh={onRefresh}
+                        tintColor="#8B5CF6" 
+                    />
+                }
+            >
 
                 {/* Search Results */}
                 {searchQuery.trim() !== '' && (

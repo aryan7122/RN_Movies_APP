@@ -57,7 +57,7 @@ const fetchWithTimeout = async (url: string, options = {}) => {
     }
 };
 
-// Helper function to transform OMDB movie data
+    // Helper function to transform OMDB movie data
 const transformMovieData = (movie: any): Movie | null => {
     // Skip invalid movies
     if (!movie || !movie.imdbID) return null;
@@ -65,8 +65,12 @@ const transformMovieData = (movie: any): Movie | null => {
     // Handle cases where Poster is 'N/A'
     const posterUrl = movie.Poster && movie.Poster !== 'N/A' ? movie.Poster : null;
     
+    // Extract numeric ID and ensure it's a number
+    const numericId = movie.imdbID.replace('tt', '');
+    if (!/^\d+$/.test(numericId)) return null;
+    
     return {
-        id: parseInt(movie.imdbID.replace('tt', '')),
+        id: parseInt(numericId),
         title: movie.Title || 'Unknown Title',
         overview: movie.Plot || '',
         poster_path: posterUrl,
@@ -75,9 +79,7 @@ const transformMovieData = (movie: any): Movie | null => {
         release_date: movie.Year || 'N/A',
         genre_ids: movie.Genre ? movie.Genre.split(', ').map((_: string, i: number) => i) : []
     };
-};
-
-// Default movies for different categories
+};// Default movies for different categories
 const ALL_MOVIES = {
     popular: [
         "tt0111161", // The Shawshank Redemption
@@ -128,7 +130,6 @@ const ALL_MOVIES = {
         "tt5090568", // Dune: Part Two
         "tt14362112", // Deadpool 3
         "tt21807222", // Ghostbusters: Frozen Empire
-        "tt11304740", // Minecraft
         "tt12261776", // Killers of the Flower Moon
         "tt2567856", // Mission: Impossible 8
         "tt10160976", // Rebel Moon
@@ -139,11 +140,12 @@ const ALL_MOVIES = {
         "tt15671028", // Kraven the Hunter
         "tt9362930", // Poor Things
         "tt21454134", // Madame Web
-        "tt11304740", // Mickey 17
+        "tt15239678", // Mission: Impossible - Dead Reckoning Part One
         "tt11304742", // Kingdom of the Planet of the Apes
         "tt11389872", // Blade
         "tt11304744", // Superman: Legacy
-        "tt11304746"  // Thunderbolts
+        "tt11304746", // Thunderbolts
+        "tt14998742"  // Godzilla x Kong: The New Empire
     ]
 };
 
@@ -158,15 +160,36 @@ export const api = {
 
     // Get movie details by IMDB ID
     getMovieById: async (id: string) => {
-        const response = await fetchWithTimeout(endpoints.byId(id));
-        const data = await handleResponse(response);
-        return data.Response === 'True' ? transformMovieData(data) : null;
+        // Ensure ID starts with 'tt'
+        const imdbId = id.startsWith('tt') ? id : `tt${id}`;
+        // Validate IMDB ID format (tt followed by 7-8 digits)
+        if (!/^tt\d{7,8}$/.test(imdbId)) {
+            console.error('Invalid IMDB ID format:', imdbId);
+            return null;
+        }
+        
+        try {
+            const response = await fetchWithTimeout(endpoints.byId(imdbId));
+            const data = await handleResponse(response);
+            return data.Response === 'True' ? transformMovieData(data) : null;
+        } catch (error) {
+            console.error('Error fetching movie:', error);
+            return null;
+        }
     },
 
     // Get full movie details including cast and crew
     getMovieDetails: async (id: string): Promise<MovieDetails | null> => {
         try {
-            const response = await fetchWithTimeout(endpoints.byId(id));
+            // Ensure ID starts with 'tt'
+            const imdbId = id.startsWith('tt') ? id : `tt${id}`;
+            // Validate IMDB ID format (tt followed by 7-8 digits)
+            if (!/^tt\d{7,8}$/.test(imdbId)) {
+                console.error('Invalid IMDB ID format:', imdbId);
+                return null;
+            }
+
+            const response = await fetchWithTimeout(endpoints.byId(imdbId));
             const data = await handleResponse(response);
             
             if (data.Response !== 'True') {
