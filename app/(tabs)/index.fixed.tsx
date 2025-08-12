@@ -25,14 +25,14 @@ const CATEGORIES = [
 
 // MovieCard component for rendering individual movies
 const MovieCard = ({ movie }: { movie: Movie }) => {
-    if (!movie?.poster_path) return null;
+    if (!movie?.poster) return null;
     
     return (
-        <Link href={`/Movie/${movie.id}`} asChild>
+        <Link href={`/(tabs)/Movie/${movie.id}`} asChild>
             <Pressable className="ml-5 mr-4 w-[160px]">
                 <View className="relative rounded-3xl overflow-hidden">
                     <Image
-                        source={{ uri: movie.poster_path }}
+                        source={{ uri: movie.poster }}
                         className="w-full h-[240px]"
                         resizeMode="cover"
                     />
@@ -46,7 +46,7 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
                                 className="w-4 h-4 mr-1"
                             />
                             <Text className="text-white text-sm font-medium">
-                                {movie.vote_average.toFixed(1)}
+                                {movie.rating || 'N/A'}
                             </Text>
                         </View>
                     </LinearGradient>
@@ -61,7 +61,7 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
                     className="text-gray-400 text-sm"
                     numberOfLines={1}
                 >
-                    {movie.release_date.split('-')[0]}
+                    {movie.year}
                 </Text>
             </Pressable>
         </Link>
@@ -71,13 +71,11 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
 const MovieList = ({ 
     title, 
     movies,
-    isLoading,
-    category
+    isLoading
 }: { 
     title: string;
     movies: Movie[];
     isLoading?: boolean;
-    category?: string;
 }) => {
     if (isLoading) {
         return (
@@ -98,19 +96,15 @@ const MovieList = ({
         <View className="mb-8">
             <View className="flex-row items-center justify-between px-5 mb-4">
                 <Text className="text-white text-xl font-bold">{title}</Text>
-                {category && (
-                    <Link href={`/SeeAll/${category}`} asChild>
-                        <Pressable>
-                            <Text className="text-purple-500 text-base font-semibold">See All</Text>
-                        </Pressable>
-                    </Link>
-                )}
+                <Pressable>
+                    <Text className="text-purple-500 text-sm">See All</Text>
+                </Pressable>
             </View>
             <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
             >
-                {movies.filter(movie => movie && movie.id).map(movie => (
+                {movies.map(movie => (
                     <MovieCard key={String(movie.id)} movie={movie} />
                 ))}
             </ScrollView>
@@ -120,6 +114,7 @@ const MovieList = ({
 
 function Home() {
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState('all');
     const [trending, setTrending] = useState<Movie[]>([]);
     const [popular, setPopular] = useState<Movie[]>([]);
     const [upcoming, setUpcoming] = useState<Movie[]>([]);
@@ -136,9 +131,9 @@ function Home() {
                 api.getUpcoming()
             ]);
 
-            setTrending(trendingData?.filter((m): m is Movie => m !== null) || []);
-            setPopular(popularData?.filter((m): m is Movie => m !== null) || []);
-            setUpcoming(upcomingData?.filter((m): m is Movie => m !== null) || []);
+            setTrending(trendingData || []);
+            setPopular(popularData || []);
+            setUpcoming(upcomingData || []);
         } catch (error) {
             console.error('Error fetching movies:', error);
             Alert.alert('Error', 'Failed to fetch movies. Please try again.');
@@ -173,66 +168,83 @@ function Home() {
     }, []);
 
     return (
-        <View className="flex-1 bg-[#0F0D23] pt-12">
-            {/* Main ScrollView */}
+        <ScrollView 
+            className="flex-1 bg-[#0F0D23]"
+            refreshControl={
+                <RefreshControl 
+                    refreshing={refreshing} 
+                    onRefresh={onRefresh}
+                    tintColor="#8B5CF6" 
+                />
+            }
+        >
+            {/* Search Bar */}
+            <View className="px-5 pt-12 pb-4">
+                <TextInput
+                    className="bg-[#1F1D36] text-white px-4 py-3 rounded-xl"
+                    placeholder="Search movies..."
+                    placeholderTextColor="#666"
+                    value={searchQuery}
+                    onChangeText={(text) => {
+                        setSearchQuery(text);
+                        handleSearch(text);
+                    }}
+                />
+            </View>
+
+            {/* Category Tabs */}
             <ScrollView 
-                className="flex-1"
-                refreshControl={
-                    <RefreshControl 
-                        refreshing={refreshing} 
-                        onRefresh={onRefresh}
-                        tintColor="#8B5CF6" 
-                    />
-                }
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                className="mb-6 px-5"
             >
-                {/* Search Bar */}
-                <View className="px-5 pb-4">
-                    <TextInput
-                        className="bg-[#1F1D36] text-white px-4 py-3 rounded-xl"
-                        placeholder="Search movies..."
-                        placeholderTextColor="#666"
-                        value={searchQuery}
-                        onChangeText={(text) => {
-                            setSearchQuery(text);
-                            handleSearch(text);
-                        }}
-                    />
-                </View>
-
-                {/* Search Results */}
-                {searchQuery.trim() !== '' && (
-                    <MovieList 
-                        title="Search Results" 
-                        movies={searchResults}
-                        isLoading={false} 
-                    />
-                )}
-
-                {/* Movie Lists */}
-                {searchQuery.trim() === '' && (
-                    <>
-                        <MovieList 
-                            title="Trending Now" 
-                            movies={trending}
-                            isLoading={loading} 
-                            category="trending"
-                        />
-                        <MovieList 
-                            title="Popular Movies" 
-                            movies={popular}
-                            isLoading={loading} 
-                            category="popular"
-                        />
-                        <MovieList 
-                            title="Upcoming Movies" 
-                            movies={upcoming}
-                            isLoading={loading} 
-                            category="upcoming"
-                        />
-                    </>
-                )}
+                {CATEGORIES.map(category => (
+                    <Pressable
+                        key={category.id}
+                        onPress={() => setActiveCategory(category.id)}
+                        className={`mr-4 px-6 py-2 rounded-full ${
+                            activeCategory === category.id 
+                                ? 'bg-purple-500' 
+                                : 'bg-[#1F1D36]'
+                        }`}
+                    >
+                        <Text className="text-white font-medium">
+                            {category.label}
+                        </Text>
+                    </Pressable>
+                ))}
             </ScrollView>
-        </View>
+
+            {/* Search Results */}
+            {searchQuery.trim() !== '' && (
+                <MovieList 
+                    title="Search Results" 
+                    movies={searchResults}
+                    isLoading={false} 
+                />
+            )}
+
+            {/* Movie Lists */}
+            {searchQuery.trim() === '' && (
+                <>
+                    <MovieList 
+                        title="Trending Now" 
+                        movies={trending}
+                        isLoading={loading} 
+                    />
+                    <MovieList 
+                        title="Popular Movies" 
+                        movies={popular}
+                        isLoading={loading} 
+                    />
+                    <MovieList 
+                        title="Upcoming Movies" 
+                        movies={upcoming}
+                        isLoading={loading} 
+                    />
+                </>
+            )}
+        </ScrollView>
     );
 }
 
