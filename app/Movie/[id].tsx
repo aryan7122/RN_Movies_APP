@@ -13,8 +13,8 @@ export default function Page() {
     useEffect(() => {
         const fetchMovie = async () => {
             try {
-                // Add back the "tt" prefix for OMDB API
-                const imdbId = `tt${id}`;
+                // Handle ID with or without "tt" prefix
+                const imdbId = id.toString().startsWith('tt') ? id.toString() : `tt${id}`;
                 console.log('Fetching movie with ID:', imdbId);
                 const data = await api.getMovieDetails(imdbId);
                 console.log('Movie data:', data);

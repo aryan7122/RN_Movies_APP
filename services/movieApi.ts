@@ -40,7 +40,7 @@ const fetchWithTimeout = async (url: string, options = {}) => {
     const timeout = setTimeout(() => controller.abort(), TIMEOUT_DURATION);
 
     try {
-        console.log('Fetching:', url); // Debug log
+        // console.log('Fetching:', url); // Debug log
         const response = await fetch(url, {
             ...options,
             signal: controller.signal,

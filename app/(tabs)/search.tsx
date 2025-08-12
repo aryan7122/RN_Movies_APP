@@ -93,7 +93,7 @@ const MovieCard = ({ movie }: { movie: Movie }) => (
 const CategorySection = ({ title, movies, loading }: { title: string; movies: Movie[]; loading: boolean }) => {
     if (loading) {
         return (
-            <View className="mb-8 px-5">
+            <View className="mb-8 ">
                 <Text className="text-white text-xl font-bold mb-4">{title}</Text>
                 <ActivityIndicator size="large" color="#8B5CF6" />
             </View>
@@ -110,7 +110,7 @@ const CategorySection = ({ title, movies, loading }: { title: string; movies: Mo
             <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
-                className="-mx-5 px-5"
+                className="-mx-5 px-5 pb-4"
             >
                 {movies.map(movie => (
                     <Link key={movie.id} href={`/Movie/${movie.id}`} asChild>
@@ -361,15 +361,15 @@ const Search = () => {
             </View>
 
             {/* Content */}
-            <ScrollView className="flex-1">
+            <ScrollView className="flex-1 p-2 mb-14 pr-10">
                 {/* Search Results */}
                 {query || selectedTag ? (
                     loading.search ? (
-                        <View className="flex-1 justify-center items-center py-8">
+                        <View className="flex-1  justify-center items-center py-8">
                             <ActivityIndicator size="large" color="#8B5CF6" />
                         </View>
                     ) : searchResults.length > 0 ? (
-                        <View className="px-3 py-4">
+                        <View className="px-3 py-4 ">
                             <Text className="text-white text-xl font-bold mb-4 px-2">Search Results</Text>
                             <View className="flex-row flex-wrap">
                                 {searchResults.map((movie: Movie) => (

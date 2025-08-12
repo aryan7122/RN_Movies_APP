@@ -65,13 +65,13 @@ const TabButton = ({ label, icon, isFocused, onPress }: TabButtonProps) => {
     return (
         <Pressable
             onPress={onPress}
-            className={`flex-1 justify-center items-center relative mx-1`}
+            className={`flex-1 justify-between items-center relative `}
             style={{
                 transform: [{ scale: isFocused ? 1.05 : 1 }],
             }}
         >
             <View
-                className={`items-center justify-center py-3 ${isFocused ? 'w-32' : 'w-14 h-14'} rounded-full`}
+                className={`items-center justify-center py-3 ${isFocused ? 'p-4' : 'w-14 h-14'} rounded-xl`}
                 style={{
                     backgroundColor: isFocused ? '#8B5CF6' : '#1F1D36',
                     borderWidth: 1,
@@ -107,13 +107,13 @@ const TabButton = ({ label, icon, isFocused, onPress }: TabButtonProps) => {
 // Agar navigation prop na mile to useNavigation hook ka use karo
 const CustomTabBar = ({ state, descriptors, navigation }: CustomTabBarProps) => {
     return (
-        <View className="absolute bottom-6 left-4 right-4" style={{
+        <View className="absolute bottom-[-1px] left-0 right-0" style={{
                 ...Platform.select({
                     ios: {
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 8,
+                        shadowOpacity: 0.9,
+                        shadowRadius: 0,
                     },
                     android: {
                         elevation: 8,
