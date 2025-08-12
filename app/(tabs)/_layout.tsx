@@ -20,13 +20,20 @@ const THEME = {
     }
 }
 
+// Tab configuration
+const TABS = [
+    { name: 'index', label: 'Home', icon: require('@/assets/icons/home.png') },
+    { name: 'search', label: 'Search', icon: require('@/assets/icons/search.png') },
+    { name: 'saved', label: 'Saved', icon: require('@/assets/icons/save.png') },
+    { name: 'profile', label: 'Profile', icon: require('@/assets/icons/person.png') },
+]
+
 // Define types for better error handling
 type TabButtonProps = {
     label: string;
     icon: any;
     isFocused: boolean;
     onPress: () => void;
-    gradientIndex: number;
 }
 
 type Route = {
@@ -58,43 +65,37 @@ const TabButton = ({ label, icon, isFocused, onPress }: TabButtonProps) => {
     return (
         <Pressable
             onPress={onPress}
-            className={`flex-1 h-14 justify-center items-center relative rounded-2xl mx-1`}
+            className={`flex-1 justify-center items-center relative mx-1`}
             style={{
                 transform: [{ scale: isFocused ? 1.05 : 1 }],
             }}
         >
-            {isFocused && (
-                <View 
-                    className="absolute w-full h-full bg-purple-500/15 rounded-2xl"
-                    style={{
-                        borderWidth: 1,
-                        borderColor: '#8B5CF6',
-                        borderRadius: 16,
-                    }}
-                />
-            )}
             <View
-                className={`flex-row items-center justify-center py-2 ${isFocused ? 'px-4' : 'px-3'} rounded-2xl`}
+                className={`items-center justify-center py-3 ${isFocused ? 'w-32' : 'w-14 h-14'} rounded-full`}
+                style={{
+                    backgroundColor: isFocused ? '#8B5CF6' : '#1F1D36',
+                    borderWidth: 1,
+                    borderColor: isFocused ? '#A78BFA' : 'transparent',
+                }}
             >
-                <Image
-                    source={icon}
-                    className={`w-6 h-6`}
-                    style={{
-                        tintColor: isFocused ? '#8B5CF6' : '#6B7280',
-                        opacity: isFocused ? 1 : 0.7,
-                    }}
-                />
-                {isFocused && (
-                    <Text
-                        className="text-purple-500 text-sm font-bold ml-2"
-                        numberOfLines={1}
+                <View className="flex-row items-center justify-center">
+                    <Image
+                        source={icon}
+                        className={`w-6 h-6`}
                         style={{
-                            opacity: 0.9,
+                            tintColor: isFocused ? '#FFFFFF' : '#6B7280',
+                            opacity: isFocused ? 1 : 0.7,
                         }}
-                    >
-                        {label}
-                    </Text>
-                )}
+                    />
+                    {isFocused && (
+                        <Text
+                            className="text-white text-sm font-bold ml-2"
+                            numberOfLines={1}
+                        >
+                            {label}
+                        </Text>
+                    )}
+                </View>
             </View>
         </Pressable>
     )
@@ -121,7 +122,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: CustomTabBarProps) => 
             }}>
             {/* Modern tab bar container with glass effect */}
             <View
-                className="flex-row bg-[#1F1D36]/95 backdrop-blur-lg rounded-2xl overflow-hidden p-1 items-center border border-purple-500/20 shadow-xl"
+                className="flex-row justify-evenly bg-[#1F1D36]/95 backdrop-blur-lg rounded-2xl overflow-hidden p-1 items-center border border-purple-500/20 shadow-xl"
                 style={{
                     shadowColor: '#8B5CF6',
                     shadowOffset: { width: 0, height: 4 },
