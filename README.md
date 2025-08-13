@@ -1,50 +1,70 @@
-# Welcome to your Expo app 👋
+# CineScope - A React Native Movie Discovery App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+CineScope is a mobile application built with React Native and Expo that allows users to discover movies. You can browse popular, trending, and upcoming movies, search for specific titles, and view detailed information about them.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Browse Movie Categories**: View lists of "Trending Now", "Popular", and "Upcoming" movies on the home screen.
+- **Infinite Scroll Lists**: Horizontally scroll through movie lists.
+- **Search Functionality**: Search for movies by title.
+- **Movie Details**: Tap on any movie to see a detailed view with information like plot, rating, release year, and more.
+- **Pull-to-Refresh**: Refresh the movie lists on the home screen with a simple pull-down gesture.
+- **Clean, Modern UI**: Styled with NativeWind (Tailwind CSS for React Native).
 
-   ```bash
-   npm install
-   ```
+## Tech Stack
 
-2. Start the app
+- **Framework**: [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Navigation**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
+- **Styling**: [NativeWind](https://www.nativewind.dev/) / [Tailwind CSS](https://tailwindcss.com/)
+- **Data Source**: [OMDB API](https://www.omdbapi.com/)
 
-   ```bash
-   npx expo start
-   ```
+## Getting Started
 
-In the output, you'll find options to open the app in a
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Prerequisites
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- [Node.js](https://nodejs.org/) (LTS version recommended)
+- `npm` or `yarn` package manager
+- [Expo Go](https://expo.dev/go) app on your iOS or Android device for testing.
 
-## Get a fresh project
+### API Key Setup
 
-When you're ready, run:
+This project uses the OMDB API to fetch movie data. The API key is currently hardcoded in the `services/movieApi.ts` file for demonstration purposes.
 
-```bash
-npm run reset-project
-```
+**IMPORTANT**: You should obtain your own free API key from [www.omdbapi.com/apikey.aspx](http://www.omdbapi.com/apikey.aspx).
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+For a real application, it is strongly recommended to store this key in a secure way, for example, using environment variables, and not to commit it directly into your version control.
 
-## Learn more
+### Installation
 
-To learn more about developing your project with Expo, look at the following resources:
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd <repo-directory>
+    ```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-## Join the community
+### Running the App
 
-Join our community of developers creating universal apps.
+1.  **Start the Metro server:**
+    ```bash
+    npx expo start
+    ```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+2.  In the output, you'll find a QR code. Scan it with the Expo Go app on your phone to open the project. You can also run it on an Android emulator or iOS simulator if you have them set up.
+
+## Project Structure
+
+The project is organized with a clear separation of concerns:
+
+-   `app/`: Contains all screens and navigation logic (using Expo Router).
+-   `assets/`: Static assets like fonts and images.
+-   `components/`: Reusable UI components.
+-   `services/`: Handles API calls to the OMDB service.
+-   `interfaces/`: TypeScript type definitions for data structures like `Movie`.
