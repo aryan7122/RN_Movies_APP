@@ -1,89 +1,92 @@
-import React from 'react';
-import {
-    Image,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    View
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Image, FlatList, TouchableOpacity } from "react-native";
 
-// Profile stats data
-const PROFILE_STATS = [
-    { label: 'Watchlist', value: 18 },
-    { label: 'Favorites', value: 25 },
-    { label: 'Reviews', value: 5 },
-];
-
-// Settings options
-const SETTINGS = [
-    { id: 'account', label: 'Account Settings', icon: '👤' },
-    { id: 'notifications', label: 'Notifications', icon: '🔔' },
-    { id: 'appearance', label: 'Appearance', icon: '🎨' },
-    { id: 'privacy', label: 'Privacy & Security', icon: '🔒' },
-    { id: 'help', label: 'Help & Support', icon: '❓' },
-    { id: 'logout', label: 'Logout', icon: '🚪' },
-];
+import { useGlobalContext } from "../../context/GlobalProvider";
+import { getUserPosts, signOut } from "../../services/appwrite";
+import { useAppwrite } from "../../hooks/useAppwrite";
+import VideoCard from "../../components/MovieCard";
+import EmptyState from "../../components/EmptyState";
+import InfoBox from "../../components/InfoBox";
+import { icons } from "../../constants";
 
 const Profile = () => {
-    return (
-        <SafeAreaView className="flex-1 bg-[#0F0D23]">
-            <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-                {/* Profile Header */}
-                <View className="items-center py-8 bg-[#1F1D36] rounded-b-3xl">
-                    <View
-                        className="w-32 h-32 rounded-full border-4 border-purple-500 mb-4"
-                        style={{
-                            ...Platform.select({
-                                ios: {
-                                    shadowColor: '#8B5CF6',
-                                    shadowOffset: { width: 0, height: 4 },
-                                    shadowOpacity: 0.5,
-                                    shadowRadius: 8,
-                                },
-                                android: {
-                                    elevation: 12,
-                                },
-                            }),
-                        }}
-                    >
-                        <Image
-                            source={{ uri: 'https://randomuser.me/api/portraits/women/68.jpg' }}
-                            className="w-full h-full rounded-full"
-                        />
-                    </View>
-                    <Text className="text-white text-2xl font-bold">Jane Doe</Text>
-                    <Text className="text-gray-400 text-base">jane.doe@example.com</Text>
-                </View>
+  const { user, setUser, setIsLogged } = useGlobalContext();
+  const { data: posts } = useAppwrite(() => getUserPosts(user.$id));
 
-                {/* Profile Stats */}
-                <View className="flex-row justify-around py-6">
-                    {PROFILE_STATS.map(stat => (
-                        <View key={stat.label} className="items-center">
-                            <Text className="text-white text-xl font-bold">{stat.value}</Text>
-                            <Text className="text-gray-400 text-sm">{stat.label}</Text>
-                        </View>
-                    ))}
-                </View>
+  const logout = async () => {
+    await signOut();
+    setUser(null);
+    setIsLogged(false);
 
-                {/* Settings List */}
-                <View className="px-5 mt-4">
-                    <Text className="text-white text-xl font-bold mb-4">Settings</Text>
-                    {SETTINGS.map(setting => (
-                        <Pressable
-                            key={setting.id}
-                            className="flex-row items-center bg-[#1F1D36] p-4 rounded-xl mb-3"
-                        >
-                            <Text className="text-2xl mr-4">{setting.icon}</Text>
-                            <Text className="text-white text-base flex-1">{setting.label}</Text>
-                            <Text className="text-gray-400 text-lg">›</Text>
-                        </Pressable>
-                    ))}
-                </View>
-            </ScrollView>
-        </SafeAreaView>
-    );
+    router.replace("/sign-in");
+  };
+
+  return (
+    <SafeAreaView className="bg-primary h-full">
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item.$id}
+        renderItem={({ item }) => (
+          <VideoCard
+            title={item.title}
+            thumbnail={item.thumbnail}
+            video={item.video}
+            creator={item.creator.username}
+            avatar={item.creator.avatar}
+          />
+        )}
+        ListEmptyComponent={() => (
+          <EmptyState
+            title="No Videos Found"
+            subtitle="No videos found for this profile"
+          />
+        )}
+        ListHeaderComponent={() => (
+          <View className="w-full flex justify-center items-center mt-6 mb-12 px-4">
+            <TouchableOpacity
+              onPress={logout}
+              className="flex w-full items-end mb-10"
+            >
+              <Image
+                source={icons.logout}
+                resizeMode="contain"
+                className="w-6 h-6"
+              />
+            </TouchableOpacity>
+
+            <View className="w-16 h-16 border border-secondary rounded-lg flex justify-center items-center">
+              <Image
+                source={{ uri: user?.avatar }}
+                className="w-[90%] h-[90%] rounded-lg"
+                resizeMode="cover"
+              />
+            </View>
+
+            <InfoBox
+              title={user?.username}
+              containerStyles="mt-5"
+              titleStyles="text-lg"
+            />
+
+            <View className="mt-5 flex flex-row">
+              <InfoBox
+                title={posts.length || 0}
+                subtitle="Posts"
+                titleStyles="text-xl"
+                containerStyles="mr-10"
+              />
+              <InfoBox
+                title="1.2k"
+                subtitle="Followers"
+                titleStyles="text-xl"
+              />
+            </View>
+          </View>
+        )}
+      />
+    </SafeAreaView>
+  );
 };
 
 export default Profile;
