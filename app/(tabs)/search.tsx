@@ -1,16 +1,17 @@
+import MovieCard from '@/components/MovieCard'
 import { Movie } from '@/interfaces/interfaces'
 import { api } from '@/services/movieApi'
 import { Link } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import {
-  ActivityIndicator,
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View
+    ActivityIndicator,
+    Image,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -35,59 +36,6 @@ const LANGUAGES = [
     { id: 'ja', name: 'Japanese' },
     { id: 'es', name: 'Spanish' },
 ]
-
-// Movie card component for search results
-const MovieCard = ({ movie }: { movie: Movie }) => (
-    <Link href={`/Movie/${movie.id}`} asChild>
-        <Pressable 
-            className="flex-1 m-2"
-            style={{
-                ...Platform.select({
-                    ios: {
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 8,
-                    },
-                    android: {
-                        elevation: 8,
-                    },
-                }),
-            }}
-        >
-            <View className="rounded-2xl overflow-hidden bg-[#1F1D36]">
-                <Image
-                    source={movie.poster_path ? { uri: movie.poster_path } : require('@/assets/images/bg.png')}
-                    className="w-full h-[200px]"
-                    resizeMode="cover"
-                />
-                <View className="p-3">
-                    <Text 
-                        className="text-white text-base font-semibold mb-1"
-                        numberOfLines={1}
-                    >
-                        {movie.title}
-                    </Text>
-                    <View className="flex-row items-center justify-between">
-                        <Text className="text-gray-400 text-sm">
-                            {movie.release_date?.split('-')[0]}
-                        </Text>
-                        <View className="flex-row items-center">
-                            <Image 
-                                source={require('@/assets/icons/star.png')}
-                                className="w-4 h-4 mr-1"
-                                style={{ tintColor: '#FFD700' }}
-                            />
-                            <Text className="text-white text-sm">
-                                {(movie.vote_average / 2).toFixed(1)}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-            </View>
-        </Pressable>
-    </Link>
-)
 
 // Category sections component
 const CategorySection = ({ title, movies, loading }: { title: string; movies: Movie[]; loading: boolean }) => {
